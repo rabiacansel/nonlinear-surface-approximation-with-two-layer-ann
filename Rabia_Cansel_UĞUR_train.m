@@ -1,10 +1,8 @@
-%Rabia Cansel UĞUR
 %31/05/2025
 
 clear all; close all; clc;
 logsig = @(x) 1 ./ (1 + exp(-x));
 tic
-% VERİ SETİ
 [X, Y] = meshgrid(-5:1:5, -5:1:5);
 X_base = [X(:), Y(:)];
 targets = [
@@ -35,9 +33,7 @@ targets = [
     3 2;
     -5 0
 ];
-% Her hedef nokta için eklenecek örnek sayısı
 n_extra = 50;
-% Gürültü miktarı
 noise_std = 0.1;
 extra_points = [];
 for i = 1:size(targets,1)
@@ -48,15 +44,12 @@ end
 X_base = [X_base; extra_points];
 X = X_base;
 
-% GİRİŞ NORMALİZASYONU
 Xmin = min(X);
 Xmax = max(X);
 Xnorm = 2*((X - Xmin)./(Xmax - Xmin)) - 1;
 
-% ÇIKIŞ (Normalizasyon yok)
 Yd = [2*X(:,1)+X(:,2).^2, X(:,1).^2+2*X(:,2)];
 
-% AĞ PARAMETRELERİ
 epoch = 100;
 Nh = 15;
 E = 1;
@@ -64,7 +57,6 @@ eta = 0.01;
 momentum = 0.7;
 Cost_epoch = [];
 
-% Xavier başlatma
 limit1 = sqrt(6/(2+Nh));
 W1 = rand(Nh,2)*2*limit1 - limit1;
 bias1 = rand(Nh,1)*2*limit1 - limit1;
@@ -73,13 +65,11 @@ limit2 = sqrt(6/(Nh+2));
 W2 = rand(2,Nh)*2*limit2 - limit2;
 bias2 = rand(2,1)*2*limit2 - limit2;
 
-% Momentum başlangıç
 delta_W1_prev = zeros(size(W1));
 delta_bias1_prev = zeros(size(bias1));
 delta_W2_prev = zeros(size(W2));
 delta_bias2_prev = zeros(size(bias2));
 
-% EĞİTİM
 for iterasyon = 1:epoch
     for i = 1:size(X,1)
         x_input = Xnorm(i,:)';
@@ -98,7 +88,6 @@ for iterasyon = 1:epoch
         A = (yerel_gradyen2' * W2)';
         yerel_gradyen1 = A .* (Y1 .* (1 - Y1));
 
-        % Momentumlu güncelleme
         delta_W2 = eta * yerel_gradyen2 * Y1' + momentum * delta_W2_prev;
         W2 = W2 + delta_W2;
         delta_W2_prev = delta_W2;
@@ -125,7 +114,6 @@ for iterasyon = 1:epoch
 end
 toc
 
-% YÜZEY GÖRSELLEŞTİRME
 x1 = -5:0.5:5;
 x2 = 5:-0.5:-5;
 [X1, X2] = meshgrid(x1, x2);
@@ -160,7 +148,6 @@ hold on, plot3(X(:,1),X(:,2),Yd(:,1),'rd');
 subplot(2,2,4), mesh(X1,X2,Ag_cikis2), title('Çıkış2 elde edilen yüzey');
 hold on, plot3(X(:,1),X(:,2),Yd(:,2),'rd');
 
-% TEST VERİSİ
 X_test = [-3 -3; 3 3; 0 4; 4 0; -4 0; 0 -4; 1 1; -1 -1; 2 -2; -2 2];
 Y_test = [2*X_test(:,1)+X_test(:,2).^2, X_test(:,1).^2+2*X_test(:,2)];
 
@@ -177,7 +164,6 @@ end
 
 mse = mean((Y_test - Y_pred).^2);
 
-% Performans oranları
 max_range = 60; % yaklaşık aralık
 perf1 = 1 - mse(1)/max_range^2;
 perf2 = 1 - mse(2)/max_range^2;
